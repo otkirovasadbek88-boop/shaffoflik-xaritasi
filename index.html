@@ -1272,22 +1272,39 @@ function resetMap() {
 
 // === COMPLAINT ===
 let complaintCount = 318;
-function submitComplaint() {
-  const viloyat = document.getElementById('shkViloyat').value;
-  const org = document.getElementById('shkOrg').value;
-  const soha = document.getElementById('shkSoha').value;
-  const matn = document.getElementById('shkMatn').value;
+async function submitComplaint() {
+  const viloyat = document.getElementById("shkViloyat").value;
+  const org = document.getElementById("shkOrg").value;
+  const soha = document.getElementById("shkSoha").value;
+  const matn = document.getElementById("shkMatn").value;
+  const aloqa = document.getElementById("shkAloqa").value;
+  const shaxs = document.getElementById("shkPerson").value;
   if (!viloyat || !org || !soha || !matn) {
-    showNotif('❌ Xato', 'Iltimos, majburiy maydonlarni to\'ldiring.');
+    showNotif("❌ Xato", "Iltimos, majburiy maydonlarni to'ldiring.");
     return;
   }
-  complaintCount++;
-  document.getElementById('totalCases').textContent = complaintCount;
-  document.getElementById('shkViloyat').value = '';
-  document.getElementById('shkOrg').value = '';
-  document.getElementById('shkSoha').value = '';
-  document.getElementById('shkMatn').value = '';
-  showNotif('✅ Shikoyat qabul qilindi!', `#SHK-2024-${String(complaintCount).padStart(4,'0')} — Prokuratura tizimiga yo'naltirildi`);
+  showNotif("⏳ Yuborilmoqda...", "Iltimos kuting...");
+  try {
+    const ok = await supabaseRequest("shikoyatlar", "POST", {
+      viloyat, tashkilot_nomi: org, xodim_ismi: shaxs,
+      soha, matn, aloqa, holat: "yangi"
+    });
+    if (ok) {
+      complaintCount++;
+      document.getElementById("totalCases").textContent = complaintCount;
+      document.getElementById("shkViloyat").value = "";
+      document.getElementById("shkOrg").value = "";
+      document.getElementById("shkSoha").value = "";
+      document.getElementById("shkMatn").value = "";
+      document.getElementById("shkAloqa").value = "";
+      document.getElementById("shkPerson").value = "";
+      showNotif("✅ Shikoyat qabul qilindi!", "#SHK-" + String(complaintCount).padStart(4,"0") + " — Bazaga saqlandi!");
+    } else {
+      showNotif("❌ Xato", "Yuborishda muammo. Qayta urinib ko'ring.");
+    }
+  } catch(e) {
+    showNotif("❌ Xato", "Internet aloqasini tekshiring.");
+  }
 }
 
 // === STAFF ===
@@ -1307,6 +1324,39 @@ function closeModal(id) {
 document.querySelectorAll('.modal-overlay').forEach(m => {
   m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); });
 });
+
+// === SUPABASE ===
+const SUPABASE_URL = 'https://gtidgtyoprhyolerimjp.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_uT8TnBzoLMDutJCQuJpYZg_HUe5EAzk';
+
+async function supabaseRequest(table, method='GET', body=null) {
+  const options = {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY
+    }
+  };
+  if (body) options.body = JSON.stringify(body);
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, options);
+  if (method === 'GET') return await res.json();
+  return res.ok;
+}
+
+async function loadStats() {
+  try {
+    const shikoyatlar = await supabaseRequest('shikoyatlar?select=*');
+    if (Array.isArray(shikoyatlar)) {
+      const jami = shikoyatlar.length;
+      const hal = shikoyatlar.filter(s => s.holat === 'hal_qilindi').length;
+      if (jami > 0) {
+        animateCounter(document.getElementById('totalCases'), 318 + jami);
+        animateCounter(document.getElementById('solvedCases'), 187 + hal);
+      }
+    }
+  } catch(e) { console.log('Stats load error', e); }
+}
 
 // === NOTIFICATION ===
 let notifTimer;
@@ -1333,6 +1383,7 @@ setTimeout(() => {
   animateCounter(document.getElementById('totalCases'), 318);
   animateCounter(document.getElementById('totalOrgs'), 1924);
   animateCounter(document.getElementById('solvedCases'), 187);
+  loadStats();
 }, 300);
 </script>
 </body>
