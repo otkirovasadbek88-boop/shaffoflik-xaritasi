@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Panel — Shaffoflik Xaritasi</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Unbounded:wght@400;700&family=Noto+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f1a;
+    --surface: #111827;
+    --surface2: #1a2332;
+    --border: #1e3a5f;
+    --accent: #00d4ff;
+    --accent3: #22c55e;
+    --danger: #ef4444;
+    --warn: #f59e0b;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #64748b;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Noto Sans',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+
+  /* LOGIN */
+  .login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(ellipse at 50% 50%, rgba(0,100,180,0.1) 0%, transparent 70%);
+  }
+  .login-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 40px;
+    width: 380px;
+    box-shadow: 0 0 40px rgba(0,212,255,0.1);
+  }
+  .login-logo {
+    text-align: center;
+    margin-bottom: 28px;
+  }
+  .login-logo-icon {
+    font-size: 40px;
+    display: block;
+    margin-bottom: 12px;
+  }
+  .login-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 16px;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .login-sub {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'IBM Plex Mono', monospace;
+  }
+  .form-group { margin-bottom: 16px; }
+  .form-label {
+    display: block;
+    font-size: 11px;
+    color: var(--text3);
+    font-family: 'IBM Plex Mono', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+  }
+  .form-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'Noto Sans', sans-serif;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-input:focus { border-color: var(--accent); }
+  .login-btn {
+    width: 100%;
+    padding: 13px;
+    background: var(--accent);
+    color: #000;
+    font-weight: 700;
+    font-size: 13px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'Unbounded', sans-serif;
+    margin-top: 8px;
+    transition: all 0.2s;
+  }
+  .login-btn:hover { background: #00b8d9; }
+  .login-error {
+    color: var(--danger);
+    font-size: 12px;
+    text-align: center;
+    margin-top: 10px;
+    display: none;
+  }
+  .login-note {
+    font-size: 11px;
+    color: var(--text3);
+    text-align: center;
+    margin-top: 16px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* ADMIN LAYOUT */
+  .admin-screen { display: none; }
+  .admin-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 24px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .admin-logo {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 13px;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .admin-user {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 13px;
+    color: var(--text2);
+  }
+  .logout-btn {
+    padding: 6px 14px;
+    background: transparent;
+    border: 1px solid var(--danger);
+    border-radius: 6px;
+    color: var(--danger);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    transition: all 0.15s;
+  }
+  .logout-btn:hover { background: rgba(239,68,68,0.1); }
+
+  .admin-body {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: calc(100vh - 60px);
+  }
+
+  /* SIDEBAR */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 16px 0;
+  }
+  .sidebar-item {
+    padding: 12px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text2);
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
+  }
+  .sidebar-item:hover { background: var(--surface2); color: var(--text); }
+  .sidebar-item.active { background: rgba(0,212,255,0.08); color: var(--accent); border-left-color: var(--accent); }
+  .sidebar-icon { font-size: 16px; }
+  .sidebar-badge {
+    margin-left: auto;
+    background: var(--danger);
+    color: #fff;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+  }
+
+  /* CONTENT */
+  .content { padding: 24px; overflow-y: auto; }
+  .page { display: none; }
+  .page.active { display: block; }
+
+  .page-title {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: var(--text);
+  }
+
+  /* STATS CARDS */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .stat-val {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .stat-label { font-size: 11px; color: var(--text3); font-family:'IBM Plex Mono',monospace; text-transform:uppercase; }
+
+  /* TABLE */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .table-header {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+  td {
+    padding: 12px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(30,58,95,0.3);
+    color: var(--text2);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(0,212,255,0.03); }
+
+  .status-badge {
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+  }
+  .status-yangi { background:rgba(0,212,255,0.15); color:var(--accent); border:1px solid rgba(0,212,255,0.3); }
+  .status-tekshirilmoqda { background:rgba(245,158,11,0.15); color:var(--warn); border:1px solid rgba(245,158,11,0.3); }
+  .status-hal_qilindi { background:rgba(34,197,94,0.15); color:var(--accent3); border:1px solid rgba(34,197,94,0.3); }
+  .status-rad_etildi { background:rgba(100,116,139,0.15); color:var(--text3); border:1px solid rgba(100,116,139,0.3); }
+
+  .action-btn {
+    padding: 4px 10px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text2);
+    font-size: 11px;
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    margin-right: 4px;
+    transition: all 0.15s;
+  }
+  .action-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .action-btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .filter-select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: var(--text2);
+    font-size: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    outline: none;
+    cursor: pointer;
+  }
+  .filter-select:focus { border-color: var(--accent); }
+
+  .refresh-btn {
+    padding: 8px 16px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 6px;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+  .refresh-btn:hover { background: #00b8d9; }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px;
+    color: var(--text3);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+  }
+
+  .notification {
+    position: fixed;
+    bottom: 20px; right: 20px;
+    background: var(--surface);
+    border: 1px solid var(--accent3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    box-shadow: 0 0 20px rgba(34,197,94,0.2);
+    transform: translateY(80px);
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 9999;
+  }
+  .notification.show { transform: translateY(0); opacity: 1; }
+
+  .loading {
+    text-align: center;
+    padding: 30px;
+    color: var(--text3);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner {
+    display: inline-block;
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 8px;
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div class="login-screen" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <span class="login-logo-icon">🔐</span>
+      <div class="login-title">ADMIN PANEL</div>
+      <div class="login-sub">SHAFFOFLIK XARITASI — VAKOLATLI KIRISH</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Login</label>
+      <input class="form-input" type="text" id="loginUser" placeholder="admin@shaffoflik.uz" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Parol</label>
+      <input class="form-input" type="password" id="loginPass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="login-btn" onclick="doLogin()">KIRISH</button>
+    <div class="login-error" id="loginError">Login yoki parol noto'g'ri!</div>
+    <div class="login-note">Faqat vakolatli xodimlar uchun<br>Ruxsatsiz kirish jinoyat hisoblanadi</div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div class="admin-screen" id="adminScreen">
+  <div class="admin-header">
+    <div class="admin-logo">🗺️ SHAFFOFLIK XARITASI — ADMIN</div>
+    <div class="admin-user">
+      <span id="adminName">Admin</span>
+      <button class="logout-btn" onclick="doLogout()">CHIQISH</button>
+    </div>
+  </div>
+  <div class="admin-body">
+    <div class="sidebar">
+      <div class="sidebar-item active" onclick="showPage('dashboard')">
+        <span class="sidebar-icon">📊</span> Dashboard
+      </div>
+      <div class="sidebar-item" onclick="showPage('shikoyatlar')">
+        <span class="sidebar-icon">⚠️</span> Shikoyatlar
+        <span class="sidebar-badge" id="yangiSoni">0</span>
+      </div>
+      <div class="sidebar-item" onclick="showPage('tashkilotlar')">
+        <span class="sidebar-icon">🏢</span> Tashkilotlar
+      </div>
+      <div class="sidebar-item" onclick="showPage('statistika')">
+        <span class="sidebar-icon">📈</span> Statistika
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-title">Dashboard</div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-val" style="color:var(--accent)" id="d-jami">—</div>
+            <div class="stat-label">Jami shikoyatlar</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" style="color:var(--danger)" id="d-yangi">—</div>
+            <div class="stat-label">Yangi (ko'rilmagan)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" style="color:var(--warn)" id="d-tekshir">—</div>
+            <div class="stat-label">Tekshirilmoqda</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" style="color:var(--accent3)" id="d-hal">—</div>
+            <div class="stat-label">Hal qilindi</div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <div class="table-header">
+            <span>So'nggi shikoyatlar</span>
+            <button class="refresh-btn" onclick="loadShikoyatlar()">↻ Yangilash</button>
+          </div>
+          <div id="dashboardTable"><div class="loading"><div class="spinner"></div><br>Yuklanmoqda...</div></div>
+        </div>
+      </div>
+
+      <!-- SHIKOYATLAR -->
+      <div class="page" id="page-shikoyatlar">
+        <div class="page-title">Barcha Shikoyatlar</div>
+        <div class="filter-row">
+          <select class="filter-select" id="filterHolat" onchange="filterShikoyatlar()">
+            <option value="">Barcha holatlar</option>
+            <option value="yangi">Yangi</option>
+            <option value="tekshirilmoqda">Tekshirilmoqda</option>
+            <option value="hal_qilindi">Hal qilindi</option>
+            <option value="rad_etildi">Rad etildi</option>
+          </select>
+          <select class="filter-select" id="filterViloyat" onchange="filterShikoyatlar()">
+            <option value="">Barcha viloyatlar</option>
+            <option>Toshkent shahri</option>
+            <option>Buxoro viloyati</option>
+            <option>Farg'ona viloyati</option>
+            <option>Samarqand viloyati</option>
+            <option>Andijon viloyati</option>
+            <option>Namangan viloyati</option>
+            <option>Qashqadaryo viloyati</option>
+          </select>
+          <button class="refresh-btn" onclick="loadShikoyatlar()">↻ Yangilash</button>
+        </div>
+        <div class="table-wrap">
+          <div id="shikoyatlarTable"><div class="loading"><div class="spinner"></div><br>Yuklanmoqda...</div></div>
+        </div>
+      </div>
+
+      <!-- TASHKILOTLAR -->
+      <div class="page" id="page-tashkilotlar">
+        <div class="page-title">Tashkilotlar</div>
+        <div class="table-wrap">
+          <div class="table-header">
+            <span>Tashkilotlar ro'yxati</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nomi</th>
+                <th>Turi</th>
+                <th>Viloyat</th>
+                <th>Shikoyatlar</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>1</td><td>Toshkent shahar 34-maktabi</td><td>Ta'lim</td><td>Toshkent shahri</td><td><span class="status-badge status-tekshirilmoqda">3 ta</span></td></tr>
+              <tr><td>2</td><td>Buxoro shahar 7-maktabi</td><td>Ta'lim</td><td>Buxoro viloyati</td><td><span class="status-badge status-yangi">5 ta</span></td></tr>
+              <tr><td>3</td><td>Farg'ona viloyat kasalxonasi</td><td>Sog'liq</td><td>Farg'ona viloyati</td><td><span class="status-badge status-yangi">4 ta</span></td></tr>
+              <tr><td>4</td><td>Samarqand shahar suv ta'minoti</td><td>Kommunal</td><td>Samarqand viloyati</td><td><span class="status-badge status-tekshirilmoqda">2 ta</span></td></tr>
+              <tr><td>5</td><td>Toshkent viloyat hokimligi</td><td>Mahkama</td><td>Toshkent viloyati</td><td><span class="status-badge status-yangi">6 ta</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- STATISTIKA -->
+      <div class="page" id="page-statistika">
+        <div class="page-title">Statistika</div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-val" style="color:var(--accent)" id="s-jami">—</div>
+            <div class="stat-label">Jami shikoyatlar</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" style="color:var(--accent3)" id="s-hal">—</div>
+            <div class="stat-label">Hal qilindi</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" style="color:var(--warn)" id="s-davom">—</div>
+            <div class="stat-label">Jarayonda</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val" style="color:var(--danger)" id="s-yangi">—</div>
+            <div class="stat-label">Yangi</div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header"><span>Viloyatlar bo'yicha</span></div>
+          <table>
+            <thead><tr><th>Viloyat</th><th>Shikoyatlar</th><th>Holat</th></tr></thead>
+            <tbody>
+              <tr><td>Toshkent shahri</td><td>47</td><td><span class="status-badge status-tekshirilmoqda">Yuqori</span></td></tr>
+              <tr><td>Farg'ona viloyati</td><td>38</td><td><span class="status-badge status-yangi">Yuqori</span></td></tr>
+              <tr><td>Buxoro viloyati</td><td>34</td><td><span class="status-badge status-yangi">Yuqori</span></td></tr>
+              <tr><td>Andijon viloyati</td><td>29</td><td><span class="status-badge status-tekshirilmoqda">O'rta</span></td></tr>
+              <tr><td>Qashqadaryo viloyati</td><td>22</td><td><span class="status-badge status-tekshirilmoqda">O'rta</span></td></tr>
+              <tr><td>Xorazm viloyati</td><td>21</td><td><span class="status-badge status-tekshirilmoqda">O'rta</span></td></tr>
+              <tr><td>Samarqand viloyati</td><td>19</td><td><span class="status-badge status-hal_qilindi">Past</span></td></tr>
+              <tr><td>Namangan viloyati</td><td>18</td><td><span class="status-badge status-hal_qilindi">Past</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="notification" id="notif"></div>
+
+<script>
+const SUPABASE_URL = 'https://gtidgtyoprhyolerimjp.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_uT8TnBzoLMDutJCQuJpYZg_HUe5EAzk';
+
+// Admin credentials
+const ADMINS = [
+  { login: 'admin', parol: 'admin123', ism: 'Bosh Administrator' },
+  { login: 'prokuratura', parol: 'prokuratura2024', ism: 'Prokuratura Xodimi' },
+  { login: 'nazorat', parol: 'nazorat2024', ism: 'Nazorat Bo\'limi' }
+];
+
+let allShikoyatlar = [];
+
+function doLogin() {
+  const login = document.getElementById('loginUser').value.trim();
+  const parol = document.getElementById('loginPass').value;
+  const admin = ADMINS.find(a => a.login === login && a.parol === parol);
+  if (admin) {
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('adminScreen').style.display = 'block';
+    document.getElementById('adminName').textContent = admin.ism;
+    loadShikoyatlar();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+
+function doLogout() {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('adminScreen').style.display = 'none';
+  document.getElementById('loginUser').value = '';
+  document.getElementById('loginPass').value = '';
+}
+
+function showPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+async function supabaseGet(table, query='') {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?${query}`, {
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY
+    }
+  });
+  return await res.json();
+}
+
+async function supabasePatch(table, id, data) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify(data)
+  });
+  return res.ok;
+}
+
+async function loadShikoyatlar() {
+  try {
+    const data = await supabaseGet('shikoyatlar', 'select=*&order=created_at.desc');
+    allShikoyatlar = Array.isArray(data) ? data : [];
+
+    // Stats
+    const yangi = allShikoyatlar.filter(s => s.holat === 'yangi').length;
+    const tekshir = allShikoyatlar.filter(s => s.holat === 'tekshirilmoqda').length;
+    const hal = allShikoyatlar.filter(s => s.holat === 'hal_qilindi').length;
+    const jami = allShikoyatlar.length;
+
+    document.getElementById('d-jami').textContent = jami;
+    document.getElementById('d-yangi').textContent = yangi;
+    document.getElementById('d-tekshir').textContent = tekshir;
+    document.getElementById('d-hal').textContent = hal;
+    document.getElementById('yangiSoni').textContent = yangi;
+
+    document.getElementById('s-jami').textContent = jami;
+    document.getElementById('s-hal').textContent = hal;
+    document.getElementById('s-davom').textContent = tekshir;
+    document.getElementById('s-yangi').textContent = yangi;
+
+    renderTable(allShikoyatlar);
+  } catch(e) {
+    showNotif('❌ Xato: ' + e.message);
+  }
+}
+
+function renderTable(list) {
+  const html = list.length === 0
+    ? '<div class="empty-state">📭 Shikoyatlar yo\'q</div>'
+    : `<table>
+      <thead><tr>
+        <th>#</th><th>Viloyat</th><th>Tashkilot</th><th>Soha</th><th>Matn</th><th>Aloqa</th><th>Holat</th><th>Amal</th>
+      </tr></thead>
+      <tbody>${list.map((s,i) => `
+        <tr>
+          <td>${i+1}</td>
+          <td>${s.viloyat||'—'}</td>
+          <td>${s.tashkilot_nomi||'—'}</td>
+          <td>${s.soha||'—'}</td>
+          <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.matn||'—'}</td>
+          <td>${s.aloqa ? s.aloqa : '<span style="color:var(--text3)">Anonim</span>'}</td>
+          <td><span class="status-badge status-${s.holat||'yangi'}">${holatText(s.holat)}</span></td>
+          <td>
+            <button class="action-btn" onclick="changeHolat(${s.id},'tekshirilmoqda')">▶</button>
+            <button class="action-btn" onclick="changeHolat(${s.id},'hal_qilindi')" style="color:var(--accent3)">✓</button>
+            <button class="action-btn danger" onclick="changeHolat(${s.id},'rad_etildi')">✗</button>
+          </td>
+        </tr>`).join('')}
+      </tbody></table>`;
+
+  document.getElementById('dashboardTable').innerHTML = html;
+  document.getElementById('shikoyatlarTable').innerHTML = html;
+}
+
+function holatText(holat) {
+  const m = {yangi:'Yangi', tekshirilmoqda:'Tekshirilmoqda', hal_qilindi:'Hal qilindi', rad_etildi:'Rad etildi'};
+  return m[holat] || holat || 'Yangi';
+}
+
+async function changeHolat(id, holat) {
+  const ok = await supabasePatch('shikoyatlar', id, { holat });
+  if (ok) {
+    showNotif('✅ Holat yangilandi: ' + holatText(holat));
+    loadShikoyatlar();
+  } else {
+    showNotif('❌ Xato yuz berdi');
+  }
+}
+
+function filterShikoyatlar() {
+  const holat = document.getElementById('filterHolat').value;
+  const viloyat = document.getElementById('filterViloyat').value;
+  let filtered = allShikoyatlar;
+  if (holat) filtered = filtered.filter(s => s.holat === holat);
+  if (viloyat) filtered = filtered.filter(s => s.viloyat === viloyat);
+  renderTable(filtered);
+}
+
+let notifTimer;
+function showNotif(msg) {
+  const n = document.getElementById('notif');
+  n.textContent = msg;
+  n.classList.add('show');
+  clearTimeout(notifTimer);
+  notifTimer = setTimeout(() => n.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
