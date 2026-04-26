@@ -410,7 +410,8 @@
       <div class="sidebar-item" onclick="showPage('tashkilotlar')">
         <span class="sidebar-icon">🏢</span> Tashkilotlar
       </div>
-      <div class="sidebar-item" onclick="showPage('statistika')">
+      <div class="sidebar-item" onclick="showPage('statistika')"><span class="sidebar-icon">📈</span> Statistika</div>
+      <div class="sidebar-item" id="sozlamalarMenu" style="display:none" onclick="showPage('sozlamalar')"><span class="sidebar-icon">⚙️</span> Sozlamalar</div>
         <span class="sidebar-icon">📈</span> Statistika
       </div>
     </div>
@@ -543,6 +544,49 @@
         </div>
       </div>
 
+      <!-- SOZLAMALAR (faqat superadmin) -->
+      <div class="page" id="page-sozlamalar">
+        <div class="page-title">⚙️ Sozlamalar</div>
+        <div class="table-wrap" style="margin-bottom:16px;">
+          <div class="table-header"><span>Admin foydalanuvchilar</span></div>
+          <table>
+            <thead><tr><th>Ism</th><th>Login</th><th>Rol</th><th>Holat</th></tr></thead>
+            <tbody>
+              <tr>
+                <td>Bosh Administrator</td>
+                <td>admin</td>
+                <td><span class="status-badge status-yangi">Superadmin</span></td>
+                <td><span class="status-badge status-hal_qilindi">Faol</span></td>
+              </tr>
+              <tr>
+                <td>Prokuratura Xodimi</td>
+                <td>prokuratura</td>
+                <td><span class="status-badge status-tekshirilmoqda">Xodim</span></td>
+                <td><span class="status-badge status-hal_qilindi">Faol</span></td>
+              </tr>
+              <tr>
+                <td>Nazorat Bo'limi</td>
+                <td>nazorat</td>
+                <td><span class="status-badge status-tekshirilmoqda">Xodim</span></td>
+                <td><span class="status-badge status-hal_qilindi">Faol</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-wrap">
+          <div class="table-header"><span>Tizim sozlamalari</span></div>
+          <table>
+            <thead><tr><th>Sozlama</th><th>Qiymat</th></tr></thead>
+            <tbody>
+              <tr><td>Supabase URL</td><td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent)">gtidgtyoprhyolerimjp.supabase.co</td></tr>
+              <tr><td>Railway API</td><td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent)">shaffoflik-xaritasi-production.up.railway.app</td></tr>
+              <tr><td>GitHub Pages</td><td style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--accent)">otkirovasadbek88-boop.github.io/shaffoflik-xaritasi</td></tr>
+              <tr><td>Versiya</td><td style="font-family:'IBM Plex Mono',monospace;font-size:11px;">v1.0.0</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>
@@ -555,21 +599,26 @@ const SUPABASE_KEY = 'sb_publishable_uT8TnBzoLMDutJCQuJpYZg_HUe5EAzk';
 
 // Admin credentials
 const ADMINS = [
-  { login: 'admin', parol: 'admin123', ism: 'Bosh Administrator' },
-  { login: 'prokuratura', parol: 'prokuratura2024', ism: 'Prokuratura Xodimi' },
+  { login: 'admin', parol: 'admin123', ism: 'Bosh Administrator', rol: 'superadmin' },
+  { login: 'prokuratura', parol: 'prokuratura2024', ism: 'Prokuratura Xodimi', rol: 'xodim' },
   { login: 'nazorat', parol: 'nazorat2024', ism: 'Nazorat Bo\'limi' }
 ];
 
 let allShikoyatlar = [];
+let currentAdmin = null;
 
 function doLogin() {
   const login = document.getElementById('loginUser').value.trim();
   const parol = document.getElementById('loginPass').value;
   const admin = ADMINS.find(a => a.login === login && a.parol === parol);
   if (admin) {
+    currentAdmin = admin;
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('adminScreen').style.display = 'block';
     document.getElementById('adminName').textContent = admin.ism;
+    // Faqat superadmin sozlamalarni ko'radi
+    const sozMenu = document.getElementById('sozlamalarMenu');
+    if (sozMenu) sozMenu.style.display = admin.rol === 'superadmin' ? 'flex' : 'none';
     loadShikoyatlar();
   } else {
     document.getElementById('loginError').style.display = 'block';
