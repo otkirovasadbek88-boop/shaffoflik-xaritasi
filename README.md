@@ -1,4 +1,4 @@
-# AdLex.uz
+# AdLex
 
 **Korrupsiyaga qarshi fuqarolik nazorat tizimi**
 
