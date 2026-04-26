@@ -1,4 +1,4 @@
-# O'zbekiston Shaffoflik Xaritasi
+# AdLex.uz
 
 **Korrupsiyaga qarshi fuqarolik nazorat tizimi**
 
